@@ -7,14 +7,23 @@ def rename(base_path):
         caminho_pasta = os.path.join(base_path, pasta)
         arquivos = sorted(os.listdir(caminho_pasta))  # ordenando os arquivos para manter a sequência
 
-        if len(arquivos) != 17:
-            print(f"⚠️ O Álbum '{pasta}' não tem 17 arquivos(Lâminas). Parando...")
-            print("⚠️ Para Continuar todas as Pastas devem ter 17 arquivos(Lâminas em JPG).")
+        arquivo_qr = None
+        for arquivo in arquivos:
+            if "qr" in arquivo.lower():
+                arquivo_qr = arquivo
+                break
+
+        if arquivo_qr:
+            arquivos.remove(arquivo_qr)
+        else:
+            print(f"⚠️  A pasta '{pasta}' não contém um arquivo de QR Code. Pulando...")
             print("----------------------------------------------------------")
-            input("Pressione ENTER para continuar: ")
-            os.system("exit")
-            sys.exit()
-            break
+            continue
+
+        if not arquivos:
+            print(f"⚠️  A pasta '{pasta}' está vazia (além do QR Code). Pulando...")
+            print("----------------------------------------------------------")
+            continue
             
         # Renomeando o primeiro arquivo como "CAPA.jpg"
         primeiro_arquivo = arquivos[0]
@@ -26,7 +35,8 @@ def rename(base_path):
         
         prefixo = f"{indice_pasta:02d}"  # definindo o prefixo (01, 02, 03...)
         
-        # Renomeando os 16 arquivos restantes
+        # Renomeando as páginas
+        page_counter = 0
         for index_arquivo, arquivo in enumerate(arquivos[1:], start=1):
             extensao = os.path.splitext(arquivo)[1]  # mantém a extensão original
             novo_nome = f"{prefixo}-{index_arquivo:03d}{extensao}"  # Ex: 01-001.jpg
@@ -36,6 +46,16 @@ def rename(base_path):
 
             os.rename(antigo_caminho, novo_caminho)
             print(f"✅ Renomeado: {arquivo} → {novo_nome}")
+            page_counter = index_arquivo
+
+        # Renomeando o QR Code por último
+        if arquivo_qr:
+            extensao_qr = os.path.splitext(arquivo_qr)[1]
+            novo_nome_qr = f"{prefixo}-{page_counter + 1:03d}{extensao_qr}"
+            antigo_caminho_qr = os.path.join(caminho_pasta, arquivo_qr)
+            novo_caminho_qr = os.path.join(caminho_pasta, novo_nome_qr)
+            os.rename(antigo_caminho_qr, novo_caminho_qr)
+            print(f"✅ Renomeado: {arquivo_qr} → {novo_nome_qr}")
         
         print("----------------------------------------------------------")
 
