@@ -28,6 +28,7 @@ def rename(base_path, start_index=1):
 
         prefixo = f"{indice_pasta:02d}"
 
+        files_renamed_in_folder = 0
         # Loop through all files and rename based on position
         for index, arquivo in enumerate(arquivos):
             antigo_caminho = os.path.join(caminho_pasta, arquivo)
@@ -45,9 +46,11 @@ def rename(base_path, start_index=1):
             try:
                 os.rename(antigo_caminho, novo_caminho)
                 yield f"✅ Renomeado: {arquivo} → {novo_nome}"
+                files_renamed_in_folder += 1
             except OSError as e:
                 yield f"❌ ERRO ao renomear {arquivo}: {e}"
 
+        yield f"Total de arquivos na pasta '{pasta}': {files_renamed_in_folder}"
         yield "----------------------------------------------------------"
 
 if __name__ == "__main__":
