@@ -46,8 +46,8 @@ class RenamerApp(tk.Tk):
 
         try:
             unresized_logo = tk.PhotoImage(file="assets/logo.png")
-            # Resize the image by a factor of 5 to make it smaller
-            self.logo_image = unresized_logo.subsample(5, 5)
+            # Resize the image by a factor of 7 to make it smaller
+            self.logo_image = unresized_logo.subsample(7, 7)
             logo_label = tk.Label(top_frame, image=self.logo_image, bg=self.WHITE_COLOR)
             logo_label.grid(row=0, column=1, sticky="e")
         except tk.TclError:
@@ -62,13 +62,13 @@ class RenamerApp(tk.Tk):
         select_button = tk.Button(controls_frame, text="Selecionar Pasta", command=self.select_folder, bg=self.RED_COLOR, fg=self.WHITE_COLOR, font=("Helvetica", 12, "bold"), relief=tk.FLAT, padx=10, pady=5)
         select_button.grid(row=0, column=0, sticky="w")
 
-        self.folder_label = tk.Label(controls_frame, text="Nenhuma pasta selecionada", bg=self.WHITE_COLOR, fg=self.BLACK_COLOR, font=("Helvetica", 10))
+        self.folder_label = tk.Label(controls_frame, text="Nenhuma pasta selecionada", bg=self.WHITE_COLOR, fg=self.BLACK_COLOR, font=("Helvetica", 12))
         self.folder_label.grid(row=0, column=1, sticky="w", padx=(10, 0))
 
-        start_num_label = tk.Label(controls_frame, text="Nº do Último Álbum:", bg=self.WHITE_COLOR, fg=self.BLACK_COLOR, font=("Helvetica", 10))
+        start_num_label = tk.Label(controls_frame, text="Nº do Último Álbum:", bg=self.WHITE_COLOR, fg=self.BLACK_COLOR, font=("Helvetica", 12))
         start_num_label.grid(row=0, column=2, padx=(20, 5))
 
-        self.start_num_entry = tk.Entry(controls_frame, font=("Helvetica", 10), width=10)
+        self.start_num_entry = tk.Entry(controls_frame, font=("Helvetica", 12), width=10)
         self.start_num_entry.insert(0, "0")
         self.start_num_entry.grid(row=0, column=3, sticky="e")
 
