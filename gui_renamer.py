@@ -7,8 +7,8 @@ class RenamerApp(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Renomear Albuns - Moments Eventos")
-        self.geometry("800x600")
-        self.configure(bg="#FFFFFF")
+        self.attributes('-fullscreen', True) # Make the app start in fullscreen
+        self.bind("<Escape>", lambda event: self.attributes("-fullscreen", False)) # Allow exiting fullscreen
 
         # Define colors
         self.RED_COLOR = "#E60023"
@@ -30,9 +30,12 @@ class RenamerApp(tk.Tk):
         self.log_text.tag_config("error", foreground=self.ERROR_RED)
         self.log_text.tag_config("warning", foreground=self.WARNING_YELLOW)
         self.log_text.tag_config("info", foreground=self.BLACK_COLOR, font=("Helvetica", 11, "bold"))
+        self.log_text.tag_config("summary", foreground=self.WHITE_COLOR, font=("Helvetica", 12, "bold"))
+        self.log_text.tag_config("folder", foreground="#00BCD4", font=("Helvetica", 11, "bold")) # Cyan for folder names
 
     def create_widgets(self):
         """Creates and arranges all the widgets in the window."""
+        self.configure(bg=self.WHITE_COLOR)
         self.grid_rowconfigure(2, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
@@ -46,8 +49,8 @@ class RenamerApp(tk.Tk):
 
         try:
             unresized_logo = tk.PhotoImage(file="assets/logo.png")
-            # Resize the image by a factor of 7 to make it smaller
-            self.logo_image = unresized_logo.subsample(7, 7)
+            # Resize the image by a factor of 10 to make it smaller
+            self.logo_image = unresized_logo.subsample(10, 10)
             logo_label = tk.Label(top_frame, image=self.logo_image, bg=self.WHITE_COLOR)
             logo_label.grid(row=0, column=1, sticky="e")
         except tk.TclError:
@@ -128,6 +131,7 @@ class RenamerApp(tk.Tk):
         self.log_text.insert(tk.END, "Iniciando processo de renomeação...\n\n", "info")
         self.update_idletasks()
 
+        folders_processed = 0
         try:
             for message in rename(path, start_num + 1):
                 tag = None
@@ -137,12 +141,17 @@ class RenamerApp(tk.Tk):
                     tag = "error"
                 elif message.startswith("⚠️"):
                     tag = "warning"
+                elif "Processando pasta:" in message:
+                    tag = "folder"
+                elif "------------------" in message:
+                    folders_processed += 1
 
                 self.log_text.insert(tk.END, f"{message}\n", tag)
                 self.log_text.see(tk.END)
                 self.update_idletasks()
 
-            self.log_text.insert(tk.END, "\nPROCESSO CONCLUÍDO!", "success")
+            summary_message = f"\nPROCESSO CONCLUÍDO! Total de {folders_processed} pastas renomeadas."
+            self.log_text.insert(tk.END, summary_message, "summary")
             messagebox.showinfo("Sucesso", "Todos os álbuns foram renomeados com sucesso!")
             self.rename_button.config(text="Renomear outra pasta", command=self.reset_app, state=tk.NORMAL)
 
@@ -159,6 +168,7 @@ class RenamerApp(tk.Tk):
         self.start_num_entry.insert(0, "0")
 
         self.log_text.delete(1.0, tk.END)
+        self.log_text.insert(tk.END, "Interface resetada. Selecione uma nova pasta para começar.", "info")
 
         self.rename_button.config(text="RENOMEAR ÁLBUNS", command=self.start_renaming)
 

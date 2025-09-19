@@ -18,6 +18,7 @@ def rename(base_path, start_index=1):
     pastas = sorted([p for p in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, p))])
 
     for indice_pasta, pasta in enumerate(pastas, start=start_index):
+        yield f"\nProcessando pasta: '{pasta}'..."
         caminho_pasta = os.path.join(base_path, pasta)
         arquivos = sorted(os.listdir(caminho_pasta))
 
