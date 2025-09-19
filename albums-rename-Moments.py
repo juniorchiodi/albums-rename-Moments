@@ -1,30 +1,36 @@
 import os, sys
 
 def rename(base_path):
-    pastas = sorted([p for p in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, p))]) # processando pastas em ordem alfabética
+    pastas = sorted([p for p in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, p))])
     
     for indice_pasta, pasta in enumerate(pastas, start=i):
         caminho_pasta = os.path.join(base_path, pasta)
-        arquivos = sorted(os.listdir(caminho_pasta))  # ordenando os arquivos para manter a sequência
+        arquivos = sorted(os.listdir(caminho_pasta))
 
-        if not arquivos:
+        if len(arquivos) < 1: # Changed to < 1 as even a single file can be a CAPA
             print(f"⚠️  A pasta '{pasta}' está vazia. Pulando...")
             print("----------------------------------------------------------")
             continue
             
-        prefixo = f"{indice_pasta:02d}"  # definindo o prefixo (01, 02, 03...)
-        
-        # Renomeando todos os arquivos em sequência
-        for index_arquivo, arquivo in enumerate(arquivos, start=1):
-            extensao = os.path.splitext(arquivo)[1]  # mantém a extensão original
-            novo_nome = f"{prefixo}-{index_arquivo:03d}{extensao}"  # Ex: 01-001.jpg, 01-002.jpg ...
-            
-            antigo_caminho = os.path.join(caminho_pasta, arquivo)
-            novo_caminho = os.path.join(caminho_pasta, novo_nome)
+        prefixo = f"{indice_pasta:02d}"
 
+        # Loop through all files and rename based on position
+        for index, arquivo in enumerate(arquivos):
+            antigo_caminho = os.path.join(caminho_pasta, arquivo)
+            extensao = os.path.splitext(arquivo)[1]
+
+            if index == 0:
+                # First file is always CAPA
+                novo_nome = f"CAPA{extensao}"
+            else:
+                # Other files are numbered sequentially, starting from 1
+                # The page number is the index in the list (e.g. index 1 is page 1)
+                novo_nome = f"{prefixo}-{index:03d}{extensao}"
+
+            novo_caminho = os.path.join(caminho_pasta, novo_nome)
             os.rename(antigo_caminho, novo_caminho)
             print(f"✅ Renomeado: {arquivo} → {novo_nome}")
-        
+
         print("----------------------------------------------------------")
 
     print()
