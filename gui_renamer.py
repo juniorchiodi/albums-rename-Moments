@@ -46,8 +46,8 @@ class RenamerApp(tk.Tk):
 
         try:
             unresized_logo = tk.PhotoImage(file="assets/logo.png")
-            # Resize the image by a factor of 4 to make it smaller
-            self.logo_image = unresized_logo.subsample(4, 4)
+            # Resize the image by a factor of 5 to make it smaller
+            self.logo_image = unresized_logo.subsample(5, 5)
             logo_label = tk.Label(top_frame, image=self.logo_image, bg=self.WHITE_COLOR)
             logo_label.grid(row=0, column=1, sticky="e")
         except tk.TclError:
@@ -57,19 +57,20 @@ class RenamerApp(tk.Tk):
         # --- Controls Frame ---
         controls_frame = tk.Frame(self, bg=self.WHITE_COLOR, padx=20, pady=10)
         controls_frame.grid(row=1, column=0, sticky="ew")
+        controls_frame.grid_columnconfigure(1, weight=1)
 
         select_button = tk.Button(controls_frame, text="Selecionar Pasta", command=self.select_folder, bg=self.RED_COLOR, fg=self.WHITE_COLOR, font=("Helvetica", 12, "bold"), relief=tk.FLAT, padx=10, pady=5)
-        select_button.grid(row=0, column=0, padx=(0, 10))
+        select_button.grid(row=0, column=0, sticky="w")
 
         self.folder_label = tk.Label(controls_frame, text="Nenhuma pasta selecionada", bg=self.WHITE_COLOR, fg=self.BLACK_COLOR, font=("Helvetica", 10))
-        self.folder_label.grid(row=0, column=1, sticky="w")
+        self.folder_label.grid(row=0, column=1, sticky="w", padx=(10, 0))
 
         start_num_label = tk.Label(controls_frame, text="Nº do Último Álbum:", bg=self.WHITE_COLOR, fg=self.BLACK_COLOR, font=("Helvetica", 10))
         start_num_label.grid(row=0, column=2, padx=(20, 5))
 
         self.start_num_entry = tk.Entry(controls_frame, font=("Helvetica", 10), width=10)
         self.start_num_entry.insert(0, "0")
-        self.start_num_entry.grid(row=0, column=3)
+        self.start_num_entry.grid(row=0, column=3, sticky="e")
 
         # --- Log display ---
         log_frame = tk.Frame(self, bg=self.WHITE_COLOR)
@@ -85,8 +86,8 @@ class RenamerApp(tk.Tk):
         bottom_frame.grid(row=3, column=0, sticky="ew")
         bottom_frame.grid_columnconfigure(0, weight=1)
 
-        rename_button = tk.Button(bottom_frame, text="RENOMEAR ÁLBUNS", command=self.start_renaming, bg=self.RED_COLOR, fg=self.WHITE_COLOR, font=("Helvetica", 14, "bold"), relief=tk.FLAT, padx=20, pady=10)
-        rename_button.grid(row=0, column=0, sticky="ew")
+        self.rename_button = tk.Button(bottom_frame, text="RENOMEAR ÁLBUNS", command=self.start_renaming, bg=self.RED_COLOR, fg=self.WHITE_COLOR, font=("Helvetica", 14, "bold"), relief=tk.FLAT, padx=20, pady=10)
+        self.rename_button.grid(row=0, column=0, sticky="ew")
 
     def select_folder(self):
         path = filedialog.askdirectory(title="Selecione a pasta que contém os álbuns")
@@ -109,15 +110,18 @@ class RenamerApp(tk.Tk):
             messagebox.showerror("Erro", f"Não foi possível ler as pastas do diretório:\n{e}")
 
     def start_renaming(self):
+        self.rename_button.config(state=tk.DISABLED)
         path = self.folder_path.get()
         if not path:
             messagebox.showwarning("Aviso", "Por favor, selecione uma pasta primeiro.")
+            self.rename_button.config(state=tk.NORMAL)
             return
 
         try:
             start_num = int(self.start_num_entry.get())
         except ValueError:
             messagebox.showwarning("Aviso", "Por favor, insira um número válido para o 'Nº do Último Álbum'.")
+            self.rename_button.config(state=tk.NORMAL)
             return
 
         self.log_text.delete(1.0, tk.END)
@@ -140,9 +144,23 @@ class RenamerApp(tk.Tk):
 
             self.log_text.insert(tk.END, "\nPROCESSO CONCLUÍDO!", "success")
             messagebox.showinfo("Sucesso", "Todos os álbuns foram renomeados com sucesso!")
+            self.rename_button.config(text="Renomear outra pasta", command=self.reset_app, state=tk.NORMAL)
 
         except Exception as e:
             messagebox.showerror("Erro Crítico", f"Ocorreu um erro durante a renomeação:\n{e}")
+            self.rename_button.config(state=tk.NORMAL)
+
+    def reset_app(self):
+        """Resets the application state for a new operation."""
+        self.folder_path.set("")
+        self.folder_label.config(text="Nenhuma pasta selecionada")
+
+        self.start_num_entry.delete(0, tk.END)
+        self.start_num_entry.insert(0, "0")
+
+        self.log_text.delete(1.0, tk.END)
+
+        self.rename_button.config(text="RENOMEAR ÁLBUNS", command=self.start_renaming)
 
 if __name__ == "__main__":
     app = RenamerApp()
