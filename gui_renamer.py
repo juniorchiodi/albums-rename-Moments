@@ -70,8 +70,8 @@ class RenamerApp(tk.Tk):
         self.start_num_entry.grid(row=0, column=3)
 
         # --- Log display ---
-        log_frame = tk.Frame(self, padx=20, pady=(0, 10), bg=self.WHITE_COLOR)
-        log_frame.grid(row=2, column=0, sticky="nsew")
+        log_frame = tk.Frame(self, bg=self.WHITE_COLOR)
+        log_frame.grid(row=2, column=0, sticky="nsew", padx=20, pady=(0, 10))
         log_frame.grid_rowconfigure(0, weight=1)
         log_frame.grid_columnconfigure(0, weight=1)
 
