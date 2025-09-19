@@ -1,9 +1,20 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
 import os
+import sys
 from album_renamer_logic import rename
 
 import time
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
 
 class RenamerApp(tk.Tk):
     def __init__(self):
@@ -54,7 +65,8 @@ class RenamerApp(tk.Tk):
         title_label.grid(row=0, column=0, sticky="w")
 
         try:
-            unresized_logo = tk.PhotoImage(file="assets/logo.png")
+            logo_path = resource_path("assets/logo.png")
+            unresized_logo = tk.PhotoImage(file=logo_path)
             # Resize the image by a factor of 10 to make it smaller
             self.logo_image = unresized_logo.subsample(10, 10)
             logo_label = tk.Label(top_frame, image=self.logo_image, bg=self.WHITE_COLOR)
