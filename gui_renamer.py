@@ -137,20 +137,27 @@ class RenamerApp(tk.Tk):
         self.log_text.insert(tk.END, "Iniciando processo de renomeação...\n\n", "info")
         self.update_idletasks()
 
+        # Initialize counters for the final summary
+        folders_processed = 0
+        files_renamed = 0
+        errors_found = 0
         start_time = time.time()
+
         try:
             for message in rename(path, start_num + 1):
                 tag = None
                 if message.startswith("✅"):
                     tag = "success"
-                elif message.startswith("❌"):
-                    tag = "error"
-                elif message.startswith("⚠️"):
-                    tag = "warning"
+                    files_renamed += 1
+                elif message.startswith("❌") or message.startswith("⚠️"):
+                    tag = "error" if message.startswith("❌") else "warning"
+                    errors_found += 1
                 elif "Processando pasta:" in message:
                     tag = "folder"
                 elif "Total de arquivos na pasta" in message:
                     tag = "info"
+                elif "------------------" in message:
+                    folders_processed += 1
 
                 self.log_text.insert(tk.END, f"{message}\n", tag)
                 self.log_text.see(tk.END)
@@ -158,8 +165,18 @@ class RenamerApp(tk.Tk):
 
             end_time = time.time()
             duration = end_time - start_time
-            summary_message = f"\nPROCESSO CONCLUÍDO em {duration:.2f} segundos."
-            self.log_text.insert(tk.END, summary_message, "summary")
+
+            # Create a detailed final summary
+            summary_title = "\n--- RESUMO FINAL DA OPERAÇÃO ---"
+            summary_folders = f"Pastas Processadas: {folders_processed}"
+            summary_files = f"Arquivos Renomeados: {files_renamed}"
+            summary_errors = f"Erros/Avisos: {errors_found}"
+            summary_duration = f"Duração Total: {duration:.2f} segundos"
+            summary_footer = "------------------------------------"
+
+            final_summary = f"\n{summary_title}\n{summary_folders}\n{summary_files}\n{summary_errors}\n{summary_duration}\n{summary_footer}\n"
+
+            self.log_text.insert(tk.END, final_summary, "summary")
             messagebox.showinfo("Sucesso", "Todos os álbuns foram renomeados com sucesso!")
             self.rename_button.config(text="Renomear outra pasta", command=self.reset_app, state=tk.NORMAL)
 
