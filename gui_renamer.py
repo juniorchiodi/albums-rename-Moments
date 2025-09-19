@@ -8,80 +8,93 @@ class RenamerApp(tk.Tk):
         super().__init__()
         self.title("Renomear Albuns - Moments Eventos")
         self.geometry("800x600")
-        self.configure(bg="#FFFFFF") # White background
+        self.configure(bg="#FFFFFF")
 
         # Define colors
-        self.RED_COLOR = "#E60023" # A common 'YouTube' red, good for contrast
+        self.RED_COLOR = "#E60023"
         self.WHITE_COLOR = "#FFFFFF"
         self.BLACK_COLOR = "#282828"
+        self.SUCCESS_GREEN = "#4CAF50"
+        self.ERROR_RED = "#F44336"
+        self.WARNING_YELLOW = "#FFC107"
 
         # Path variable
         self.folder_path = tk.StringVar()
 
         self.create_widgets()
+        self.configure_tags()
+
+    def configure_tags(self):
+        """Configure tags for colored text in the log."""
+        self.log_text.tag_config("success", foreground=self.SUCCESS_GREEN)
+        self.log_text.tag_config("error", foreground=self.ERROR_RED)
+        self.log_text.tag_config("warning", foreground=self.WARNING_YELLOW)
+        self.log_text.tag_config("info", foreground=self.BLACK_COLOR, font=("Helvetica", 11, "bold"))
 
     def create_widgets(self):
-        # --- Main container ---
-        main_frame = tk.Frame(self, bg=self.WHITE_COLOR, padx=20, pady=20)
-        main_frame.pack(fill=tk.BOTH, expand=True)
+        """Creates and arranges all the widgets in the window."""
+        self.grid_rowconfigure(2, weight=1)
+        self.grid_columnconfigure(0, weight=1)
 
-        # --- Top bar for Logo ---
-        top_frame = tk.Frame(main_frame, bg=self.WHITE_COLOR)
-        top_frame.pack(fill=tk.X)
-
-        try:
-            # Note: User requested 'logo preto.png', but it was not found. Using 'logo.png'.
-            self.logo_image = tk.PhotoImage(file="assets/logo.png")
-            logo_label = tk.Label(top_frame, image=self.logo_image, bg=self.WHITE_COLOR)
-            logo_label.pack(side=tk.RIGHT)
-        except tk.TclError:
-            # Fallback if image fails to load
-            logo_label = tk.Label(top_frame, text="Moments Eventos", bg=self.WHITE_COLOR, fg=self.RED_COLOR, font=("Helvetica", 16, "bold"))
-            logo_label.pack(side=tk.RIGHT, padx=10)
+        # --- Top bar for Logo & Title ---
+        top_frame = tk.Frame(self, bg=self.WHITE_COLOR, padx=10, pady=10)
+        top_frame.grid(row=0, column=0, sticky="ew")
+        top_frame.grid_columnconfigure(0, weight=1)
 
         title_label = tk.Label(top_frame, text="Renomeador de Álbuns", bg=self.WHITE_COLOR, fg=self.BLACK_COLOR, font=("Helvetica", 24, "bold"))
-        title_label.pack(side=tk.LEFT)
+        title_label.grid(row=0, column=0, sticky="w")
+
+        try:
+            self.logo_image = tk.PhotoImage(file="assets/logo.png")
+            logo_label = tk.Label(top_frame, image=self.logo_image, bg=self.WHITE_COLOR)
+            logo_label.grid(row=0, column=1, sticky="e")
+        except tk.TclError:
+            logo_label = tk.Label(top_frame, text="Moments Eventos", bg=self.WHITE_COLOR, fg=self.RED_COLOR, font=("Helvetica", 16, "bold"))
+            logo_label.grid(row=0, column=1, sticky="e")
 
         # --- Controls Frame ---
-        controls_frame = tk.Frame(main_frame, bg=self.WHITE_COLOR, pady=10)
-        controls_frame.pack(fill=tk.X)
+        controls_frame = tk.Frame(self, bg=self.WHITE_COLOR, padx=20, pady=10)
+        controls_frame.grid(row=1, column=0, sticky="ew")
 
-        # Folder Selection
-        select_button = tk.Button(controls_frame, text="Selecionar Pasta dos Álbuns", command=self.select_folder, bg=self.RED_COLOR, fg=self.WHITE_COLOR, font=("Helvetica", 12, "bold"), relief=tk.FLAT, padx=10, pady=5)
+        select_button = tk.Button(controls_frame, text="Selecionar Pasta", command=self.select_folder, bg=self.RED_COLOR, fg=self.WHITE_COLOR, font=("Helvetica", 12, "bold"), relief=tk.FLAT, padx=10, pady=5)
         select_button.grid(row=0, column=0, padx=(0, 10))
 
         self.folder_label = tk.Label(controls_frame, text="Nenhuma pasta selecionada", bg=self.WHITE_COLOR, fg=self.BLACK_COLOR, font=("Helvetica", 10))
         self.folder_label.grid(row=0, column=1, sticky="w")
 
-        # Starting Number
-        start_num_label = tk.Label(controls_frame, text="Nº do Último Álbum (se continuar):", bg=self.WHITE_COLOR, fg=self.BLACK_COLOR, font=("Helvetica", 10))
-        start_num_label.grid(row=1, column=0, pady=(10,0), sticky="e")
+        start_num_label = tk.Label(controls_frame, text="Nº do Último Álbum:", bg=self.WHITE_COLOR, fg=self.BLACK_COLOR, font=("Helvetica", 10))
+        start_num_label.grid(row=0, column=2, padx=(20, 5))
 
         self.start_num_entry = tk.Entry(controls_frame, font=("Helvetica", 10), width=10)
         self.start_num_entry.insert(0, "0")
-        self.start_num_entry.grid(row=1, column=1, pady=(10,0), sticky="w")
+        self.start_num_entry.grid(row=0, column=3)
 
         # --- Log display ---
-        log_frame = tk.Frame(main_frame, bg=self.BLACK_COLOR, bd=1, relief=tk.SOLID)
-        log_frame.pack(fill=tk.BOTH, expand=True, pady=10)
+        log_frame = tk.Frame(self, padx=20, pady=(0, 10), bg=self.WHITE_COLOR)
+        log_frame.grid(row=2, column=0, sticky="nsew")
+        log_frame.grid_rowconfigure(0, weight=1)
+        log_frame.grid_columnconfigure(0, weight=1)
 
-        self.log_text = tk.Text(log_frame, bg="#3C3C3C", fg=self.WHITE_COLOR, font=("Consolas", 10), relief=tk.FLAT, wrap=tk.WORD)
-        self.log_text.pack(fill=tk.BOTH, expand=True, padx=1, pady=1)
+        self.log_text = tk.Text(log_frame, bg=self.BLACK_COLOR, fg=self.WHITE_COLOR, font=("Consolas", 10), relief=tk.SOLID, wrap=tk.WORD, bd=1)
+        self.log_text.grid(row=0, column=0, sticky="nsew")
 
-        # --- Action Button ---
-        rename_button = tk.Button(main_frame, text="RENOMEAR ÁLBUNS", command=self.start_renaming, bg=self.RED_COLOR, fg=self.WHITE_COLOR, font=("Helvetica", 14, "bold"), relief=tk.FLAT, padx=20, pady=10)
-        rename_button.pack()
+        # --- Action Button Frame ---
+        bottom_frame = tk.Frame(self, bg=self.WHITE_COLOR, padx=20, pady=10)
+        bottom_frame.grid(row=3, column=0, sticky="ew")
+        bottom_frame.grid_columnconfigure(0, weight=1)
+
+        rename_button = tk.Button(bottom_frame, text="RENOMEAR ÁLBUNS", command=self.start_renaming, bg=self.RED_COLOR, fg=self.WHITE_COLOR, font=("Helvetica", 14, "bold"), relief=tk.FLAT, padx=20, pady=10)
+        rename_button.grid(row=0, column=0, sticky="ew")
 
     def select_folder(self):
         path = filedialog.askdirectory(title="Selecione a pasta que contém os álbuns")
-        if not path:
-            return
+        if not path: return
 
         self.folder_path.set(path)
         self.folder_label.config(text=f".../{os.path.basename(path)}")
 
         self.log_text.delete(1.0, tk.END)
-        self.log_text.insert(tk.END, "Pastas encontradas para renomear:\n\n", "title")
+        self.log_text.insert(tk.END, "Pastas encontradas para renomear:\n\n", "info")
 
         try:
             subfolders = sorted([p for p in os.listdir(path) if os.path.isdir(os.path.join(path, p))])
@@ -106,17 +119,24 @@ class RenamerApp(tk.Tk):
             return
 
         self.log_text.delete(1.0, tk.END)
-        self.log_text.insert(tk.END, "Iniciando processo de renomeação...\n\n", "title")
+        self.log_text.insert(tk.END, "Iniciando processo de renomeação...\n\n", "info")
         self.update_idletasks()
 
         try:
-            # The rename function is a generator, so we loop through it
             for message in rename(path, start_num + 1):
-                self.log_text.insert(tk.END, f"{message}\n")
-                self.log_text.see(tk.END) # Scroll to the end
-                self.update_idletasks() # Update the GUI to prevent freezing
+                tag = None
+                if message.startswith("✅"):
+                    tag = "success"
+                elif message.startswith("❌"):
+                    tag = "error"
+                elif message.startswith("⚠️"):
+                    tag = "warning"
 
-            self.log_text.insert(tk.END, "\nPROCESSO CONCLUÍDO!", "title")
+                self.log_text.insert(tk.END, f"{message}\n", tag)
+                self.log_text.see(tk.END)
+                self.update_idletasks()
+
+            self.log_text.insert(tk.END, "\nPROCESSO CONCLUÍDO!", "success")
             messagebox.showinfo("Sucesso", "Todos os álbuns foram renomeados com sucesso!")
 
         except Exception as e:
