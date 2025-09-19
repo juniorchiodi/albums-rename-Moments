@@ -45,7 +45,9 @@ class RenamerApp(tk.Tk):
         title_label.grid(row=0, column=0, sticky="w")
 
         try:
-            self.logo_image = tk.PhotoImage(file="assets/logo.png")
+            unresized_logo = tk.PhotoImage(file="assets/logo.png")
+            # Resize the image by a factor of 4 to make it smaller
+            self.logo_image = unresized_logo.subsample(4, 4)
             logo_label = tk.Label(top_frame, image=self.logo_image, bg=self.WHITE_COLOR)
             logo_label.grid(row=0, column=1, sticky="e")
         except tk.TclError:
