@@ -3,12 +3,18 @@ from tkinter import filedialog, messagebox
 import os
 from album_renamer_logic import rename
 
+import time
+
 class RenamerApp(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Renomear Albuns - Moments Eventos")
-        self.attributes('-fullscreen', True) # Make the app start in fullscreen
-        self.bind("<Escape>", lambda event: self.attributes("-fullscreen", False)) # Allow exiting fullscreen
+        try:
+            # For Windows
+            self.state('zoomed')
+        except tk.TclError:
+            # Fallback for other OSes if 'zoomed' state is not available
+            self.attributes('-zoomed', True)
 
         # Define colors
         self.RED_COLOR = "#E60023"
@@ -131,7 +137,7 @@ class RenamerApp(tk.Tk):
         self.log_text.insert(tk.END, "Iniciando processo de renomeação...\n\n", "info")
         self.update_idletasks()
 
-        folders_processed = 0
+        start_time = time.time()
         try:
             for message in rename(path, start_num + 1):
                 tag = None
@@ -143,14 +149,16 @@ class RenamerApp(tk.Tk):
                     tag = "warning"
                 elif "Processando pasta:" in message:
                     tag = "folder"
-                elif "------------------" in message:
-                    folders_processed += 1
+                elif "Total de arquivos na pasta" in message:
+                    tag = "info"
 
                 self.log_text.insert(tk.END, f"{message}\n", tag)
                 self.log_text.see(tk.END)
                 self.update_idletasks()
 
-            summary_message = f"\nPROCESSO CONCLUÍDO! Total de {folders_processed} pastas renomeadas."
+            end_time = time.time()
+            duration = end_time - start_time
+            summary_message = f"\nPROCESSO CONCLUÍDO em {duration:.2f} segundos."
             self.log_text.insert(tk.END, summary_message, "summary")
             messagebox.showinfo("Sucesso", "Todos os álbuns foram renomeados com sucesso!")
             self.rename_button.config(text="Renomear outra pasta", command=self.reset_app, state=tk.NORMAL)
